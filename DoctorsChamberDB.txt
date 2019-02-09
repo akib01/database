@@ -1,0 +1,416 @@
+
+____________________________________________________________
+
+Tables
+
+CREATE TABLE  "ADMIN" 
+   (	"ADMIN_ID" VARCHAR2(100), 
+	"ADMIN_PASSWORD" VARCHAR2(100), 
+	 CONSTRAINT "ADMIN_PK" PRIMARY KEY ("ADMIN_ID") ENABLE
+   ) ;
+_________________________________________________________________________
+CREATE TABLE  "DOCTOR" 
+   (	"DOC_ID" VARCHAR2(1000), 
+	"DOC_NAME" VARCHAR2(1000), 
+	"DOC_PHNO" NUMBER(15,0), 
+	"DOC_AGE" NUMBER(5,0), 
+	"DEPARTMENT" VARCHAR2(1000), 
+	"SPECIALIST" VARCHAR2(1000), 
+	"SCHEDULE" VARCHAR2(1000), 
+	"ADDRESS" VARCHAR2(1000), 
+	"DOC_PASS" VARCHAR2(1000), 
+	 CONSTRAINT "DOCTOR_PK" PRIMARY KEY ("DOC_ID") ENABLE
+   ) ;
+
+
+CREATE OR REPLACE TRIGGER  "INSERT_DOC_ID" 
+before insert on doctor
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    select 'doc' || TO_CHAR(docId_seq.nextval, 'FM000')  into :new.doc_id from dual;
+end;
+/
+ALTER TRIGGER  "INSERT_DOC_ID" ENABLE;
+
+
+_________________________________________________________________________
+CREATE TABLE  "RECEPTIONIST" 
+   (	"REC_ID" VARCHAR2(1000), 
+	"REC_NAME" VARCHAR2(1000), 
+	"REC_PHNO" NUMBER(15,0), 
+	"REC_AGE" NUMBER(5,0), 
+	"REC_ADDRESS" VARCHAR2(1000), 
+	"REC_PASS" VARCHAR2(1000), 
+	 CONSTRAINT "RECEPTIONIST_PK" PRIMARY KEY ("REC_ID") ENABLE
+   ) ;
+
+
+CREATE OR REPLACE TRIGGER  "INSERT_REC_ID" 
+before insert on RECEPTIONIST
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    select 'rec' || TO_CHAR(RECID_SEQ.nextval, 'FM000')  into :new.REC_ID from dual;
+end;
+/
+ALTER TRIGGER  "INSERT_REC_ID" ENABLE;
+
+
+
+_________________________________________________________________________
+CREATE TABLE  "PATIENT" 
+   (	"PAT_ID" NUMBER(35,0), 
+	"PAT_NAME" VARCHAR2(1000), 
+	"PAT_PHNO" NUMBER(15,0), 
+	"PAT_AGE" NUMBER(5,0), 
+	"PAT_ADDRESS" VARCHAR2(1000), 
+	"GENDER" VARCHAR2(100), 
+	 CONSTRAINT "PATIENT_PK" PRIMARY KEY ("PAT_ID") ENABLE
+   ) ;
+
+
+CREATE OR REPLACE TRIGGER  "INSERT_PAT_ID" 
+before insert on PATIENT
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    select PATID_SEQ.nextval  into :new.PAT_ID from dual;
+end;
+/
+ALTER TRIGGER  "INSERT_PAT_ID" ENABLE;
+____________________________________________________________________
+CREATE TABLE  "APP_REQ" 
+   (	"REQ_ID" NUMBER(35,0), 
+	"REQ_DATE" DATE, 
+	"REC_ID" VARCHAR2(1000), 
+	"PAT_ID" NUMBER(35,0), 
+	"DOC_ID" VARCHAR2(1000), 
+	"REQ_STATUS" VARCHAR2(1000), 
+	 CONSTRAINT "APP_REQ_PK" PRIMARY KEY ("REQ_ID") ENABLE
+   ) ;
+ALTER TABLE  "APP_REQ" ADD CONSTRAINT "APP_REQ_FK" FOREIGN KEY ("REC_ID")
+	  REFERENCES  "RECEPTIONIST" ("REC_ID") ON DELETE CASCADE ENABLE;
+ALTER TABLE  "APP_REQ" ADD CONSTRAINT "APP_REQ_FK2" FOREIGN KEY ("PAT_ID")
+	  REFERENCES  "PATIENT" ("PAT_ID") ON DELETE CASCADE ENABLE;
+ALTER TABLE  "APP_REQ" ADD CONSTRAINT "APP_REQ_FK3" FOREIGN KEY ("DOC_ID")
+	  REFERENCES  "DOCTOR" ("DOC_ID") ON DELETE CASCADE ENABLE;
+
+
+CREATE OR REPLACE TRIGGER  "INSERT_REQ_ID" 
+before insert on APP_REQ
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    :new.REQ_DATE:=SYSDATE;
+    select APP_REQ_SEQ.nextval  into :new.REQ_ID from dual;
+
+end;
+/
+ALTER TRIGGER  "INSERT_REQ_ID" ENABLE;
+
+
+____________________________________________________________________
+CREATE TABLE  "MEDICINE" 
+   (	"MED_ID" NUMBER(5,0), 
+	"MED_NAME" VARCHAR2(1000), 
+	"MG" NUMBER(5,0), 
+	"TYPE" VARCHAR2(1000), 
+	 CONSTRAINT "MEDICINE_PK" PRIMARY KEY ("MED_ID") ENABLE
+   ) ;
+
+
+CREATE OR REPLACE TRIGGER  "INSERT_MED_ID" 
+before insert on MEDICINE
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    select MED_ID_SEQ.nextval  into :new.MED_ID from dual;
+end;
+/
+ALTER TRIGGER  "INSERT_MED_ID" ENABLE;
+
+___________________________________________________________
+CREATE TABLE  "TEST" 
+   (	"TEST_ID" NUMBER(5,0), 
+	"TEST_NAME" VARCHAR2(1000), 
+	 CONSTRAINT "TEST_PK" PRIMARY KEY ("TEST_ID") ENABLE
+   ) ;
+
+
+CREATE OR REPLACE TRIGGER  "INSERT_TEST_ID" 
+before insert on TEST
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    select TEST_ID_SEQ.nextval  into :new.TEST_ID from dual;
+end;
+/
+ALTER TRIGGER  "INSERT_TEST_ID" ENABLE;
+_______________________________________________________________
+CREATE TABLE  "PRESCRIPTION" 
+   (	"PRES_ID" NUMBER(35,0), 
+	"DOC_ID" VARCHAR2(1000), 
+	"PAT_ID" NUMBER(35,0), 
+	"DISEASE" VARCHAR2(1000), 
+	"PRES_DATE" DATE, 
+	"BP" VARCHAR2(100), 
+	 CONSTRAINT "PRESCRIPTION_PK" PRIMARY KEY ("PRES_ID") ENABLE
+   ) ;
+ALTER TABLE  "PRESCRIPTION" ADD CONSTRAINT "PRESCRIPTION_FK3" FOREIGN KEY ("PAT_ID")
+	  REFERENCES  "PATIENT" ("PAT_ID") ON DELETE CASCADE ENABLE;
+ALTER TABLE  "PRESCRIPTION" ADD CONSTRAINT "PRESCRIPTION_FK4" FOREIGN KEY ("DOC_ID")
+	  REFERENCES  "DOCTOR" ("DOC_ID") ON DELETE CASCADE ENABLE;
+
+
+CREATE OR REPLACE TRIGGER  "PRES_ID" 
+before insert on PRESCRIPTION
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    :new.PRES_DATE:=SYSDATE;
+    select PRES_ID_SEQ.nextval  into :new.PRES_ID from dual;
+
+end;
+/
+ALTER TRIGGER  "PRES_ID" ENABLE;
+
+_________________________________________________________________
+CREATE TABLE  "MED_IN_PRES" 
+   (	"PRES_ID" NUMBER(35,0), 
+	"MED_ID" NUMBER(5,0), 
+	"AMOUNT" NUMBER(5,0), 
+	"TIMING" VARCHAR2(1000), 
+	"CONDITION" VARCHAR2(1000), 
+	"DURATION" VARCHAR2(1000)
+   ) ;
+ALTER TABLE  "MED_IN_PRES" ADD CONSTRAINT "MED_IN_PRES_FK" FOREIGN KEY ("PRES_ID")
+	  REFERENCES  "PRESCRIPTION" ("PRES_ID") ON DELETE CASCADE ENABLE;
+ALTER TABLE  "MED_IN_PRES" ADD CONSTRAINT "MED_IN_PRES_FK2" FOREIGN KEY ("MED_ID")
+	  REFERENCES  "MEDICINE" ("MED_ID") ON DELETE CASCADE ENABLE;
+
+____________________________________________________________________
+CREATE TABLE  "TEST_IN_PRES" 
+   (	"PRES_ID" NUMBER(35,0), 
+	"TEST_ID" NUMBER(5,0)
+   ) ;
+ALTER TABLE  "TEST_IN_PRES" ADD CONSTRAINT "TEST_IN_PRES_FK" FOREIGN KEY ("PRES_ID")
+	  REFERENCES  "PRESCRIPTION" ("PRES_ID") ON DELETE CASCADE ENABLE;
+ALTER TABLE  "TEST_IN_PRES" ADD CONSTRAINT "TEST_IN_PRES_FK2" FOREIGN KEY ("TEST_ID")
+	  REFERENCES  "TEST" ("TEST_ID") ON DELETE CASCADE ENABLE;
+
+__________________________________________________________________________________
+
+CREATE TABLE  "LOG" 
+   (	"ACCESSED_BY" VARCHAR2(1000), 
+	"OPERATION" VARCHAR2(1000), 
+	"DATE&TIME" DATE, 
+	"TERGET_TABLE" VARCHAR2(1000)
+   ) ;
+
+________________________________________________________________________________________
+
+View
+CREATE OR REPLACE FORCE VIEW  "VIEW_DOCTOR" ("DOC_ID", "DOC_NAME", "DOC_PHNO", "DEPARTMENT", "SPECIALIST", "SCHEDULE") AS 
+  select "DOC_ID","DOC_NAME","DOC_PHNO","DEPARTMENT","SPECIALIST","SCHEDULE" from doctor;
+______________________________________________________
+CREATE OR REPLACE FORCE VIEW  "VIEW_MED_IN_PRES" ("TYPE", "MED_NAME", "MG", "AMOUNT", "TIMING", "CONDITION", "DURATION", "PRES_ID") AS 
+  select MEDICINE.TYPE,MEDICINE.MED_NAME,MEDICINE.MG,MED_IN_PRES.AMOUNT,MED_IN_PRES.TIMING,MED_IN_PRES.CONDITION,MED_IN_PRES.DURATION,PRESCRIPTION.PRES_ID from MED_IN_PRES,MEDICINE,PRESCRIPTION where MED_IN_PRES.MED_ID=MEDICINE.MED_ID and MED_IN_PRES.PRES_ID=PRESCRIPTION.PRES_ID;
+______________________________________________________________
+CREATE OR REPLACE FORCE VIEW  "VIEW_PAT_HISTORY" ("PAT_ID", "PAT_NAME", "PAT_AGE", "GENDER", "PAT_PHNO", "DOC_ID") AS
+  select
+PATIENT.PAT_ID,
+PATIENT.PAT_NAME,
+PATIENT.PAT_AGE,
+PATIENT.GENDER,
+PATIENT.PAT_PHNO,
+APP_REQ.DOC_ID
+from PATIENT, APP_REQ
+where
+PATIENT.PAT_ID=APP_REQ.PAT_ID and APP_REQ.REQ_STATUS != 'Pending';
+__________________________________________________
+CREATE OR REPLACE FORCE VIEW  "VIEW_REC_APP_STATUS" ("PAT_ID", "PAT_NAME", "PAT_PHNO", "PAT_ADDRESS", "GENDER", "DOC_NAME", "DEPARTMENT", "SPECIALIST", "REQ_STATUS") AS 
+  select
+  app_req.PAT_ID,
+  patient.PAT_NAME,
+  patient.PAT_PHNO,
+  patient.PAT_ADDRESS,
+  patient.GENDER,
+  DOCTOR.DOC_NAME,
+  DOCTOR.DEPARTMENT,
+  DOCTOR.SPECIALIST,
+  app_req.REQ_STATUS
+from patient, DOCTOR, app_req, RECEPTIONIST
+where
+  app_req.PAT_ID=patient.PAT_ID and
+  app_req.DOC_ID=DOCTOR.DOC_ID and
+  APP_REQ.REC_ID=RECEPTIONIST.REC_ID
+order by app_req.REQ_ID desc;
+________________________________________________________
+CREATE OR REPLACE FORCE VIEW  "VIEW_TEST_IN_PRES" ("TEST_NAME", "PRES_ID") AS 
+  select TEST.TEST_NAME,PRESCRIPTION.PRES_ID from PRESCRIPTION,TEST,TEST_IN_PRES where TEST.TEST_ID=TEST_IN_PRES.TEST_ID and PRESCRIPTION.PRES_ID=TEST_IN_PRES.PRES_ID;
+__________________________________________________________________________
+
+
+Sequence
+CREATE SEQUENCE   "APP_REQ_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
+______________________________________________________________
+CREATE SEQUENCE   "DOCID_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
+
+
+_________________________________________________________________________
+CREATE SEQUENCE   "MED_ID_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
+
+
+_________________________________________________________
+CREATE SEQUENCE   "PATID_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
+
+
+___________________________________________________________
+CREATE SEQUENCE   "PRES_ID_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
+
+
+_________________________________________________
+CREATE SEQUENCE   "RECID_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
+
+
+______________________________________________
+CREATE SEQUENCE   "TEST_ID_SEQ"  MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 NOCACHE  NOORDER  NOCYCLE ;
+
+___________________________________________________________________________________________________
+
+Triggers
+
+CREATE OR REPLACE TRIGGER  "INSERT_DOC_ID" 
+before insert on doctor
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    select 'doc' || TO_CHAR(docId_seq.nextval, 'FM000')  into :new.doc_id from dual;
+end;
+/
+ALTER TRIGGER  "INSERT_DOC_ID" ENABLE;
+_________________________________________________________-
+CREATE OR REPLACE TRIGGER  "INSERT_MED_ID" 
+before insert on MEDICINE
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    select MED_ID_SEQ.nextval  into :new.MED_ID from dual;
+end;
+/
+ALTER TRIGGER  "INSERT_MED_ID" ENABLE;
+___________________________________________________
+CREATE OR REPLACE TRIGGER  "INSERT_PAT_ID" 
+before insert on PATIENT
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    select PATID_SEQ.nextval  into :new.PAT_ID from dual;
+end;
+/
+ALTER TRIGGER  "INSERT_PAT_ID" ENABLE;
+_______________________________________________
+CREATE OR REPLACE TRIGGER  "INSERT_REC_ID" 
+before insert on RECEPTIONIST
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    select 'rec' || TO_CHAR(RECID_SEQ.nextval, 'FM000')  into :new.REC_ID from dual;
+end;
+/
+ALTER TRIGGER  "INSERT_REC_ID" ENABLE;
+___________________________________________
+CREATE OR REPLACE TRIGGER  "INSERT_REQ_ID" 
+before insert on APP_REQ
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    :new.REQ_DATE:=SYSDATE;
+    select APP_REQ_SEQ.nextval  into :new.REQ_ID from dual;
+
+end;
+/
+ALTER TRIGGER  "INSERT_REQ_ID" ENABLE;
+__________________________________________________
+CREATE OR REPLACE TRIGGER  "INSERT_TEST_ID" 
+before insert on TEST
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    select TEST_ID_SEQ.nextval  into :new.TEST_ID from dual;
+end;
+/
+ALTER TRIGGER  "INSERT_TEST_ID" ENABLE;
+_________________________________________________
+CREATE OR REPLACE TRIGGER  "PRES_ID" 
+before insert on PRESCRIPTION
+REFERENCING NEW AS NEW OLD AS OLD
+for each row
+begin
+    :new.PRES_DATE:=SYSDATE;
+    select PRES_ID_SEQ.nextval  into :new.PRES_ID from dual;
+
+end;
+/
+ALTER TRIGGER  "PRES_ID" ENABLE;
+
+__________________________________________________________________________________________________________
+
+Procedures
+
+create or replace Procedure INS_MED(proMED_NAME MEDICINE.MED_NAME%TYPE, proMG MEDICINE.MG%TYPE, proTYPE MEDICINE.TYPE%TYPE)
+as
+Begin
+INSERT INTO MEDICINE(MED_NAME, MG, TYPE) VALUES(proMED_NAME, proMG, proTYPE);
+end;
+_________________________________________________
+create or replace Procedure INS_TEST(proTEST_NAME TEST.TEST_NAME%TYPE)
+as
+Begin
+INSERT INTO TEST(TEST_NAME) VALUES(proTEST_NAME);
+end;
+_________________________________________________
+create or replace PROCEDURE SHOW_DOCTOR
+(
+ PRODOC_ID IN DOCTOR.DOC_ID%TYPE,
+ PRODOC_NAME OUT DOCTOR.DOC_NAME%TYPE,
+ PRODOC_PHNO OUT DOCTOR.DOC_PHNO%TYPE,
+ PRODOC_AGE OUT DOCTOR.DOC_AGE%TYPE,
+ PRODOC_DEPARTMENT OUT DOCTOR.DEPARTMENT%TYPE,
+ PRODOC_SPECIALIST OUT DOCTOR.SPECIALIST%TYPE,
+ PRODOC_SCHEDULE OUT DOCTOR.SCHEDULE%TYPE,
+ PRODOC_ADDRESS OUT DOCTOR.ADDRESS%TYPE
+)
+AS
+BEGIN
+SELECT DOC_NAME, DOC_PHNO, DOC_AGE,DEPARTMENT, SPECIALIST ,SCHEDULE,ADDRESS
+INTO
+PRODOC_NAME, PRODOC_PHNO, PRODOC_AGE, PRODOC_DEPARTMENT, PRODOC_SPECIALIST,PRODOC_SCHEDULE, PRODOC_ADDRESS FROM DOCTOR WHERE DOC_ID=PRODOC_ID;
+END SHOW_DOCTOR;
+____________________________________________________
+create or replace PROCEDURE SHOW_PATIENT
+(
+ proPAT_ID IN PATIENT.pat_id%TYPE,
+ proPAT_NAME OUT PATIENT.PAT_NAME%TYPE,
+ proPAT_PHNO OUT PATIENT.PAT_PHNO%TYPE
+)
+AS
+BEGIN
+select PATIENT.PAT_NAME, PATIENT.PAT_PHNO into proPAT_NAME, proPAT_PHNO from patient where PATIENT.pat_id=proPAT_ID;
+end;
+_________________________________________________
+create or replace PROCEDURE SHOW_RECEPTIONIST
+(
+ PROREC_ID IN RECEPTIONIST.REC_ID%TYPE,
+ PROREC_NAME OUT RECEPTIONIST.REC_NAME%TYPE,
+ PROREC_PHNO OUT RECEPTIONIST.REC_PHNO%TYPE,
+ PROREC_AGE OUT RECEPTIONIST.REC_AGE%TYPE,
+ PROREC_ADDRESS OUT RECEPTIONIST.REC_ADDRESS%TYPE
+)
+AS
+BEGIN
+SELECT REC_NAME, REC_PHNO, REC_AGE,REC_ADDRESS
+INTO
+PROREC_NAME, PROREC_PHNO, PROREC_AGE,PROREC_ADDRESS FROM RECEPTIONIST WHERE REC_ID=PROREC_ID;
+END SHOW_RECEPTIONIST;
